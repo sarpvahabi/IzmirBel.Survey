@@ -2,6 +2,11 @@ using IzmirBel.Survey.Models.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using IzmirBel.Survey.Data;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using IzmirBel.Survey.Services;
+using IzmirBel.Survey.Settings;
+using SendGrid.Extensions.DependencyInjection;
+using SendGrid;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +23,23 @@ builder.Services.AddDbContext<SurveyIdentityDbContext>(
 
 //Added with scaffolding Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SurveyIdentityDbContext>();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequiredLength = 12; //ASVS 2.1.1
+    options.Password.RequireDigit = false; //ASVS 2.1.9
+    options.Password.RequireLowercase = false; //ASVS 2.1.9
+    options.Password.RequireNonAlphanumeric = false; //ASVS 2.1.9
+});
+
+builder.Services.Configure<SendGridSettings>(config: builder.Configuration.GetSection("SendGridSettings"));
+
+builder.Services.AddSendGrid(options => {
+    options.ApiKey = builder.Configuration.GetSection("SendGridSettings")
+    .GetValue<string>("ApiKey");
+});
+
+builder.Services.AddScoped<IEmailSender, EmailSender>(); //AddTransient
 
 var app = builder.Build();
 
