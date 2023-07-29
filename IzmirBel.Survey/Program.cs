@@ -28,6 +28,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequiredLength = 12; //ASVS 2.1.1
     options.Password.RequireDigit = false; //ASVS 2.1.9
+    options.Password.RequireUppercase = false; //ASVS 2.1.9
     options.Password.RequireLowercase = false; //ASVS 2.1.9
     options.Password.RequireNonAlphanumeric = false; //ASVS 2.1.9
 });
