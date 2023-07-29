@@ -27,23 +27,24 @@ namespace IzmirBel.Survey.Controllers
             return View(customerSurvey); //ViewModel eklemedik
         }
 
+
+        [HttpPost]
         public async Task<ActionResult> CompleteSurvey(Guid id, SurveyAnswer[] questions)
         {
-            var customerSurvey = _surveyDbContext.CustomerSurveys
-                .Include(x => x.Questions)
-                .FirstOrDefault(x => x.Id == id);
+            CustomerSurvey? customerSurvey = _surveyDbContext.CustomerSurveys
+                .Include(x => x.Questions).FirstOrDefault(x => x.Id == id);
 
-            var customerSurveyResponse = new CustomerSurveyResponse(id, questions.ToList());
-
-            foreach (var answer in questions)
+            CustomerSurveyResponse customerSurveyResponse = new CustomerSurveyResponse(id, questions.ToList());
+            foreach (SurveyAnswer answer in questions)
+            {
                 answer.SurveyResponse = customerSurveyResponse;
+            }
 
             _surveyDbContext.CustomerSurveysResponses.Add(new CustomerSurveyResponse(id, questions.ToList()));
 
             await _surveyDbContext.SaveChangesAsync();
 
-            return View("SurveyComplete", customerSurvey);
-
+            return View(viewName: "SurveyComplete", model: customerSurvey);
         }
     }
 }

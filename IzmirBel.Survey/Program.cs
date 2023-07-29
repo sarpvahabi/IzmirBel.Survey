@@ -1,5 +1,7 @@
 using IzmirBel.Survey.Models.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using IzmirBel.Survey.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,9 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SurveyDbContext>(
-    optionsAction => optionsAction
+    options => options
         .UseSqlServer(connectionString: builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDbContext<SurveyIdentityDbContext>(
+    options => options
+        .UseSqlServer(connectionString: builder.Configuration.GetConnectionString("IdentityConnection")));
+
+//Added with scaffolding Identity
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SurveyIdentityDbContext>();
 
 var app = builder.Build();
 
@@ -31,5 +39,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapRazorPages();
 
 app.Run();
