@@ -31,6 +31,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = false; //ASVS 2.1.9
     options.Password.RequireLowercase = false; //ASVS 2.1.9
     options.Password.RequireNonAlphanumeric = false; //ASVS 2.1.9
+    options.Lockout.MaxFailedAccessAttempts = 5; //ASVS 2.2.1
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); //ASVS 2.2.1
 });
 
 builder.Services.Configure<SendGridSettings>(config: builder.Configuration.GetSection("SendGridSettings"));
@@ -40,7 +42,11 @@ builder.Services.AddSendGrid(options => {
     .GetValue<string>("ApiKey");
 });
 
-builder.Services.AddScoped<IEmailSender, EmailSender>(); //AddTransient
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+
+builder.Services.AddDistributedMemoryCache(); //redis tarzý bir data store yok, bunu yaparak session'larý memory'de tutacaðýz.
+
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -57,7 +63,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
