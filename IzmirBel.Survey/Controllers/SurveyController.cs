@@ -1,5 +1,6 @@
 ﻿using IzmirBel.Survey.Models.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace IzmirBel.Survey.Controllers
@@ -21,8 +22,8 @@ namespace IzmirBel.Survey.Controllers
         public IActionResult TakeSurvey(Guid id)
         {
             var customerSurvey = _surveyDbContext.CustomerSurveys
-                .Include(x=> x.Questions)
-                .FirstOrDefault(x=> x.Id == id);
+                .Include(x => x.Questions)
+                .FirstOrDefault(x => x.Id == id);
 
             return View(customerSurvey); //ViewModel eklemedik
         }
@@ -45,6 +46,34 @@ namespace IzmirBel.Survey.Controllers
             await _surveyDbContext.SaveChangesAsync();
 
             return View(viewName: "SurveyComplete", model: customerSurvey);
+        }
+
+        public ActionResult SurveyCompleteMessageAdo(string id)
+        {
+            string message = string.Empty;
+
+            using (var command = _surveyDbContext.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "SELECT SurveyCompleteMessage FROM CustomerSurveys WHERE Id = @id";
+                command.Parameters.Add(new SqlParameter("@id", id));
+                _surveyDbContext.Database.OpenConnection();
+                try
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            message += reader.GetString(0) + "<br/>";
+                        }
+                    }
+                }
+                finally
+                {
+                    _surveyDbContext.Database.CloseConnection();
+                }
+            }
+
+            return View("SurveyCompleteMessage", message);
         }
     }
 }

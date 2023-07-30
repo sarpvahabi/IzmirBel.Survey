@@ -25,7 +25,10 @@ namespace IzmirBel.Survey.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
-            await _signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync(); //Identity
+            HttpContext.Session.Clear();
+            DeleteAllCookies();
+
             _logger.LogInformation("User logged out.");
             if (returnUrl != null)
             {
@@ -36,6 +39,17 @@ namespace IzmirBel.Survey.Areas.Identity.Pages.Account
                 // This needs to be a redirect so that the browser performs a new
                 // request and the identity for the user gets updated.
                 return RedirectToPage();
+            }
+        }
+
+        private void DeleteAllCookies()
+        {
+            foreach (var cookieKey in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookieKey, new CookieOptions
+                {
+                    Secure = true
+                });
             }
         }
     }

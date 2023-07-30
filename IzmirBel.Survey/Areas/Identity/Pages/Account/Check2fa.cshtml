@@ -1,0 +1,25 @@
+﻿@page
+@model IzmirBel.Survey.Areas.Identity.Pages.Account.Check2faModel
+@{
+    ViewData["Title"] = "Step-Up Authentication";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.TwoFactorCode" class="form-control" autocomplete="off" />
+                <label asp-for="Input.TwoFactorCode"></label>
+                <span asp-validation-for="Input.TwoFactorCode" class="text-danger"></span>
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Continue</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

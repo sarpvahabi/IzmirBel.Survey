@@ -11,7 +11,8 @@ namespace IzmirBel.Survey.Models
         [ForeignKey(nameof(SurveyId))]
         public CustomerSurvey? Survey { get; set; }
         public Guid SurveyId { get; set; }
-        public string Question { get; set; } = string.Empty;
+        [Required]
+        public string Question { get; set; }
         public string Answer { get; set; } = string.Empty;
         public string PossibleAnswers { get; set; }
 

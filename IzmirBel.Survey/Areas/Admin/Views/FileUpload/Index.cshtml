@@ -1,0 +1,16 @@
+﻿<form method="post" enctype="multipart/form-data" asp-controller="FileUpload">
+    @Html.ValidationSummary(false, "", new {@class="text-danger"})
+    <div class="form-group">
+        <div>
+            <p>Please upload a file:</p>
+            <input type="file" name="uploadFile" />
+        </div>
+    </div>
+    <br />
+    <br />
+    <div class="form-group">
+        <div>
+            <input type="submit" value="Uploaf file" class="btn btn-primary" />
+        </div>
+    </div>
+</form>

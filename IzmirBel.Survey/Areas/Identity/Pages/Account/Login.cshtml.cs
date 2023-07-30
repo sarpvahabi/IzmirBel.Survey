@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace IzmirBel.Survey.Areas.Identity.Pages.Account
 {
@@ -82,6 +84,18 @@ namespace IzmirBel.Survey.Areas.Identity.Pages.Account
             /// </summary>
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
+
+            public override string ToString()
+            {
+                using (var algorithm = SHA512.Create())
+                {
+                    var emailHash = BitConverter.ToString(
+                        value: algorithm.ComputeHash(buffer: Encoding.UTF8.GetBytes(Email)))
+                        .Replace("-", string.Empty);
+
+                    return $"Email: {emailHash} RememberMe: {RememberMe}";
+                }
+            }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -103,6 +117,11 @@ namespace IzmirBel.Survey.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            Response.Cookies.Delete("__Host-Session", new CookieOptions
+            {
+                Secure = true
+            });
+
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -115,7 +134,7 @@ namespace IzmirBel.Survey.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     HttpContext.Session.SetString("Temp", "Logged in");
-                    _logger.LogInformation("User logged in.");
+                    _logger.LogInformation("User logged in: {userId}", Input);
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
@@ -129,6 +148,7 @@ namespace IzmirBel.Survey.Areas.Identity.Pages.Account
                 }
                 else
                 {
+                    _logger.LogWarning("Login failed: {LoginData}", Input);
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
